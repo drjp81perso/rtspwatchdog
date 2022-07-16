@@ -1,0 +1,15 @@
+{
+    "config": {
+        "sources": {
+            "doorbell": {
+                "url": "rtsp://admin:password@127.0.0.1",
+                "timeout": 30,
+                "commands_offline": "wget 'http://192.168.0.2/cameraon?cam=@@name@@&state=off' -O /dev/null",
+                "commands_online": "wget 'http://192.168.0.2/cameraon?cam=@@name@@&state=on' -O /dev/null"
+            }
+        },
+        "interval": 30,
+        "ffprobepath": "/usr/bin/ffprobe"
+        
+    }
+}
