@@ -1,11 +1,11 @@
-$global:configfile = gci /app/config/config.json -ErrorAction Ignore
+$global:configfile = Get-ChildItem /app/config/config.json -ErrorAction Ignore
 
 if (-not $global:configfile) {
     Copy-Item /app/vanilla/vanilla.json -Destination /app/config/config.json
     chmod +x /app/config/config.json
 }
 
-if (-not (gci /app/script/pid.file -ErrorAction Ignore )) {
+if (-not (Get-ChildItem /app/script/pid.file -ErrorAction Ignore )) {
     Set-Content /app/script/pid.file -Value $PID
     chmod +x /app/script/pid.file
 }
@@ -20,7 +20,7 @@ function cleanpass([string]$url) {
 function loadconfig {
     try {
         $tempconfig = Join-Path $PSScriptRoot -ChildPath ".\config.json"
-        if (gci $tempconfig -ErrorAction Ignore) {
+        if (Get-ChildItem $tempconfig -ErrorAction Ignore) {
             $global:config = Get-Content $tempconfig | Convertfrom-Json #reload config each loop, for dynamic config
         
         }
@@ -123,7 +123,7 @@ do {
     do {
         Start-Sleep -Seconds 1
         $a = $a + 1
-    } until ((get-job | ? { ($_.state -ieq "completed") -or ($_.state -ieq "failed") }).count -eq ($global:thelist.key.count) -or (($a + $tottasks) -ge [int]$global:config.config.interval ))
+    } until ((get-job | Where-Object { ($_.state -ieq "completed") -or ($_.state -ieq "failed") }).count -eq ($global:thelist.key.count) -or (($a + $tottasks) -ge [int]$global:config.config.interval ))
     Write-Host  ("Time waited for jobs to complete: " + ($a) + " seconds."  )
 
     #lets check the state of our probes
