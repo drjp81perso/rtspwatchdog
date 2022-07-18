@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM drjp81/powershell:latest
+FROM mcr.microsoft.com/powershell:latest
 
 ARG TARGETARCH
 ARG TARGETPLATFORM

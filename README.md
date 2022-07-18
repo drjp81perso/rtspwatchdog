@@ -19,28 +19,27 @@ Same happens of the source becomes unavailable.
 **NOTE:** While the source's state stays the same, no new commands are sent.
 # Getting started
 
-You can simply use the dockerfile(s) to build your own image (to get the proper version of powershell for your distro/architecture and then run a modified version of the docker-compose.yml (several are offered)
+I have exposed different flavours of the images in my docker hub repo
 
-I will be exposing different flavours of the images in my docker hub repo, ~~soon~~ (done)
+The default image/tag drjp81/camwatchdog:latest is the linux/arm64 and linux/arm32 variants. 
+For amd64 your have to use the amd64-latest tag.
 
-The default image tag drjp81/camwatchdog:latest is the linux/arm64/v8 variant. 
+Pull the right version in docker
 
-The others are architecture specified "tagged":
-- amd64-latest
-- aarch64-latest
-- armv7-latest
+Run a modified version of the docker-compose.yml to suit your needs
 
+## Option Linux
+You could just install powershell in linux and run the watch.ps1 file in a cron job.
 
+## Configurations
 The [./vanilla.json](./vanilla.json) file is a "vanilla" version of the required "config.json" file that holds your configuration.
 
 The service looks in /app/config/ for the config.json, and if it doesn't exist, it copies the vanilla file to it (internally from /app/config/).
 
 So if you prepared one of your own and would like to have a persistent config, use docker's volume mounting option to point to it. (/app/config/config.json)
 
-## Option Linux
-You could just install powershell in linux and run the watch.ps1 file in a cron job.
 
-## Configuration
+## Configuration file example
 
 ```
 {

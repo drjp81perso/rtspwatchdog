@@ -9,7 +9,7 @@ if (-not (gci /app/script/pid.file -ErrorAction Ignore )) {
     Set-Content /app/script/pid.file -Value $PID
     chmod +x /app/script/pid.file
 }
-S
+
 function cleanpass([string]$url)
 {
  if ($url -ilike "*:*@*"){
