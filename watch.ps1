@@ -9,7 +9,15 @@ if (-not (gci /app/script/pid.file -ErrorAction Ignore )) {
     Set-Content /app/script/pid.file -Value $PID
     chmod +x /app/script/pid.file
 }
-
+S
+function cleanpass([string]$url)
+{
+ if ($url -ilike "*:*@*"){
+    $tmp =  $url -replace '[\/].+@' , "//"
+    return $tmp
+ }
+ return $url
+}
 function loadconfig {
     try {
         $tempconfig = Join-Path $PSScriptRoot -ChildPath ".\config.json"
@@ -60,7 +68,7 @@ loadconfig
 #this is just to debug the output
 foreach ($source in $global:thelist) {
     Write-Host ("source name: " + $source.Key)
-    Write-Host ("source url: " + $source.Value.url)
+    Write-Host ("source url: " + (cleanpass -url $source.Value.url))
     Write-Host ("source timeout: " + $source.Value.timeout)
     Write-Host ("source commands offline: " + $source.Value.commands_offline)
     Write-Host ("source commands online: " + $source.Value.commands_online)
@@ -96,7 +104,7 @@ do {
            ($timeoutarg + " " + $source.Value.timeout * 1000000)
         )
          
-        write-host ($global:config.config.ffprobepath + " " + $cargs)
+        write-host ($global:config.config.ffprobepath + " " + (cleanpass -url $cargs))
         #okay we're going to do a bit of crazy math to spread the load
 
         $millisecondwait = (($global:config.config.interval * 1000) / 2) / $global:thelist.key.count
