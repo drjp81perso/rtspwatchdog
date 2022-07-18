@@ -13,34 +13,39 @@ Lastly I wanted to see if it could be done, it turns out it can.
 # What does it do?
 
 Simple, from a list of configured sources, it checks, via [ffprobe](https://ffmpeg.org/ffprobe.html), if they are available.
-If so, gives you the opportunity to run a command (wget in the vanilla example)
-Same happens of the source becomes unavailable.
+If so, gives you the opportunity to run a command (wget in the [./vanilla.json](./vanilla.json) example)
+Same happens when the source becomes unavailable, a specific command is launched then.
 
-**NOTE:** While the source's state stays the same, no new commands are sent.
+**NOTE:** While the source's state/availability **stays the same**, no new commands are sent.
 # Getting started
 
-I have exposed different flavours of the images in my docker hub repo
+I have exposed different flavours of the images in my [**docker hub repo**](https://hub.docker.com/repository/docker/drjp81/camwatchdog)
 
-The default image/tag drjp81/camwatchdog:latest is the linux/arm64, linux/amd64 and linux/arm32 variants. 
+The default image/tag drjp81/camwatchdog:latest a linux/arm64, linux/amd64 and linux/arm32 variant. 
 
-Pull image into docker then execute
+Pull the image into docker then execute
 
 ```
 docker run -ti -d -v {yourvolumeforpersistentconfig}:/app/config --name watchdog drjp81/camwatchdog:latest
 ```
-OR 
+AND/OR 
 
 Run a modified version of the docker-compose.yml to suit your needs
 
+OR
+
+Build your own from source
+
 ## Option Linux
 You could just install powershell in linux and run the watch.ps1 file in a cron job.
+I have 3 public flavours (arm/arm64/amd64) of powershell core 7.2.5 in my docker repo: [**drjp81/powershell**](https://hub.docker.com/repository/docker/drjp81/powershell)
 
-## Configurations
-The [./vanilla.json](./vanilla.json) file is a "vanilla" version of the required "config.json" file that holds your configuration.
+# Configurations
+The [./vanilla.json](./vanilla.json) file is a "vanilla" version of the required "config.json" file that normally represents your configuration.
 
-The service looks in /app/config/ for the config.json, and if it doesn't exist, it copies the vanilla file to it (internally from /app/config/).
+The service looks in /app/config/ directory for the config file (config.json) , and if it doesn't exist, it is generated from the vanilla.json (internally from /app/config/).
 
-So if you prepared one of your own and would like to have a persistent config, use docker's volume mounting option to point to it. (/app/config/config.json)
+So if you prepared a config file of your own and would like it to persist, use Docker's volume mounting option to point to it. (/app/config/config.json)
 
 
 ## Configuration file example
@@ -57,22 +62,22 @@ So if you prepared one of your own and would like to have a persistent config, u
             }
         },
         "interval": 30,
-        "[ffprobe](https://ffmpeg.org/ffprobe.html)path": "/usr/bin/[ffprobe](https://ffmpeg.org/ffprobe.html)"
+        "ffprobepath": "/usr/bin/ffprobe"
         
     }
 }
 ```
-Each source is defined in a json file, here we have a stream from the "doorbell"
+Each "source" is defined in a json file. Here we have a stream from the "doorbell" named as such.
 
 1. The url defines the stream we want to probe
 2. The timeout determines the maximum amount of time (in seconds) [ffprobe](https://ffmpeg.org/ffprobe.html) will wait before it gets an answer (it also defines the analyzeduration parameter: it is 2 seconds shorter).
 3. commands_offline: what to execute if the feed can't be probed successfully (here I use a web hook like command with wget) 
 4. command_offline: same as above but when it comes back online 
 
-The commands are limited by the install/image (not much in there), but there is all of the latest powershell core commands :D
+- The commands are limited by the install/image (not much in there), but there is all of the latest powershell core commands, so the possibilities are actually quite vast. :D
+- The commands are scanned for the token **@@name@@** this will be replaced by the name of the source
 
-
-And those define a source
+And those elements, define a complete source. (all of them are required!)
 
 The two other configurations are:
 
@@ -81,6 +86,10 @@ The two other configurations are:
 
 **note:** The interval is the hard limit to which the sources' timeout compare. So if you set a higher or equal value value to your sources' timeout it will ignore it and adjust to the lower interval value. 
 
+
+# FAQ
+What if I don't want to launch a command upon the camera coming back online$
+Just put a command like "echo camera @@name@@ back" or something. 
 ### ToDo: 
 ~~- Spread out the probes across the interval to use the cpu/threads more uniformly instead of spiking it with a bunch of async processes.~~
 - Some more debuggimg...
