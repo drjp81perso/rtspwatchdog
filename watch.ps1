@@ -10,19 +10,17 @@ if (-not (gci /app/script/pid.file -ErrorAction Ignore )) {
     chmod +x /app/script/pid.file
 }
 
-function cleanpass([string]$url)
-{
- if ($url -ilike "*:*@*"){
-    $tmp =  $url -replace '[\/].+@' , "//"
-    return $tmp
- }
- return $url
+function cleanpass([string]$url) {
+    if ($url -ilike "*:*@*") {
+        $tmp = $url -replace '[\/].+@' , "//"
+        return $tmp
+    }
+    return $url
 }
 function loadconfig {
     try {
         $tempconfig = Join-Path $PSScriptRoot -ChildPath ".\config.json"
-        if (gci $tempconfig -ErrorAction Ignore)
-        {
+        if (gci $tempconfig -ErrorAction Ignore) {
             $global:config = Get-Content $tempconfig | Convertfrom-Json #reload config each loop, for dynamic config
         
         }
@@ -30,7 +28,7 @@ function loadconfig {
             $global:config = Get-Content /app/config/config.json | Convertfrom-Json #reload config each loop, for dynamic config
             <# Action when all if and elseif conditions are false #>
         }
-         #reload config each loop, for dynamic config
+        #reload config each loop, for dynamic config
         $global:thelist = $global:config.config.sources | Get-ObjectMember
     }
     catch {
@@ -64,7 +62,9 @@ $scriptblock = {
     }
 
 }
-loadconfig
+if (-not (loadconfig)) {
+    Throw ("Configuration load error")
+}
 #this is just to debug the output
 foreach ($source in $global:thelist) {
     Write-Host ("source name: " + $source.Key)
@@ -76,9 +76,11 @@ foreach ($source in $global:thelist) {
 $eternity = $true
 $hashcams = @{} #keeps the last state of the attempt to connect, so we dont reissue commands for nothing
 do {
-
-    loadconfig
-        
+    Write-Host "-----------------------cycle starts-------------------------"
+    if (-not (loadconfig)) {
+        Throw ("Configuration load error")
+    }
+    $tottasks = 0 #counter to keep track of how much time to spread out the tasks on   
     #redefine the timeouts for the probes, if they are the same than the interval
     foreach ($source in $global:thelist) {
         if ($source.Value.timeout -ge $global:config.config.interval) {
@@ -89,8 +91,9 @@ do {
         }
         
         #ack!
-        if ($Env:OS -ilike "windows*"){
-            $timeoutarg = "-timeout"}
+        if ($Env:OS -ilike "windows*") {
+            $timeoutarg = "-timeout"
+        }
         else {
             $timeoutarg = "-stimeout"<# Action when all if and elseif conditions are false #>
         }
@@ -106,44 +109,52 @@ do {
          
         write-host ($global:config.config.ffprobepath + " " + (cleanpass -url $cargs))
         #okay we're going to do a bit of crazy math to spread the load
-
-        $millisecondwait = (($global:config.config.interval * 1000) / 2) / $global:thelist.key.count
-
+       
+        $millisecondwait = ((($global:config.config.interval - $global:thelist.key.count) * 1000) * (2 / 3)) / $global:thelist.key.count 
+        $tottasks = $tottasks + ($millisecondwait / 1000)
         Start-Sleep -Milliseconds $millisecondwait
 
         $j = start-job -ScriptBlock $scriptblock -ArgumentList @($global:config.config.ffprobepath, $cargs) -Name $source.Key #we put it in j so it doesn't output to screen
 
     }
+    write-host ("Jobs spawned in " + [math]::Round($tottasks,2) + " seconds")
     [int]$a = 0
     #wait for the remainder of the scan/loop interval, or that we got a reply from all probes, whichever comes first 
     do {
         Start-Sleep -Seconds 1
         $a = $a + 1
-    } until ((get-job | ? {($_.state -ieq "completed") -or ($_.state -ieq "failed")  }).count -eq ($global:thelist.key.count) -or ($a -ge [int]$global:config.config.interval ))
-    Write-Host  ("Time waited: " + ($a) + " seconds."  )
+    } until ((get-job | ? { ($_.state -ieq "completed") -or ($_.state -ieq "failed") }).count -eq ($global:thelist.key.count) -or (($a + $tottasks) -ge [int]$global:config.config.interval ))
+    Write-Host  ("Time waited for jobs to complete: " + ($a) + " seconds."  )
 
     #lets check the state of our probes
     foreach ($source in $global:thelist) {
         $job = get-job -name $source.Key
-                
+        $newcmd = ""        
         #these jobs succeeded we should execute the commands
         if ($job.State -ieq "Completed") {
             if ($hashcams[$source.Key] -eq 0) {
                 $newcmd = Invoke-Expression $source.Value.commands_online.replace("@@name@@", $source.Key) #only executes if the state changed
+                write-host ($source.Key + " Command result: " + $newcmd)
                 $hashcams[$source.Key] = 1 #set to "last time, we had success"
             } 
         }
         else {
             if ($hashcams[$source.Key] -eq 1) {
                 $newcmd = Invoke-Expression $source.Value.commands_offline.replace("@@name@@", $source.Key) #only executes if the state changed
+                write-host ($source.Key + " Command result: " + $newcmd)
                 $hashcams[$source.Key] = 0 # set to last time we failed
             }<# Action when all if and elseif conditions are false #>
         }
-        Write-Host $newcmd #debug writing the commands launched so the user knows what was sent
+        if (-not $newcmd) {
+            write-host ($source.Key + ": State is the same, nothing to do.") 
+        }
+        
         $job | Remove-Job -Force #cleanup, whatever wappens and relaunch
     }
-    $leftsleep = ([int]$global:config.config.interval - $a) #calculate what's left of the interval delay, not to hammer the system
-    write-host ("Time left to sleep: " + $leftsleep + " seconds.")
+    $leftsleep = ([int]$global:config.config.interval - ($a + $tottasks)) #calculate what's left of the interval delay, not to hammer the system
+    write-host ("Time left to sleep: " + [math]::Round($leftsleep,2) + " seconds.")
     Start-Sleep -Seconds $leftsleep
+    Write-Host "-----------------------cycle ends-------------------------"
+    write-host
 
 } while ($eternity) #loop forever
