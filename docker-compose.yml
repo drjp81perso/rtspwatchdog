@@ -5,7 +5,7 @@ services:
     container_name: watchdog
     restart: unless-stopped
     volumes:
-      - /media/POOL4/rancherdata/watchdog/config/:/app/config
+      - yourpersistentvolume:/app/config
       - /etc/timezone:/etc/timezone:ro
     command: ["/usr/bin/pwsh","-file", "/app/script/watch.ps1"]
     environment:

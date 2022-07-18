@@ -1,10 +1,10 @@
-FROM --platform=$BUILDPLATFORM drjp81/powershell:latest
+FROM drjp81/powershell as build
 
 ARG TARGETARCH
 ARG TARGETPLATFORM
-RUN apt update && apt install -y wget ffmpeg nano
+RUN apt update && apt install -y wget ffmpeg 
 
-
+FROM build
 RUN mkdir -p /app/config
 RUN mkdir -p /app/vanilla
 RUN mkdir -p /app/script

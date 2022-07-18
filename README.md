@@ -21,10 +21,14 @@ Same happens of the source becomes unavailable.
 
 I have exposed different flavours of the images in my docker hub repo
 
-The default image/tag drjp81/camwatchdog:latest is the linux/arm64 and linux/arm32 variants. 
-For amd64 your have to use the amd64-latest tag.
+The default image/tag drjp81/camwatchdog:latest is the linux/arm64, linux/amd64 and linux/arm32 variants. 
 
-Pull the right version in docker
+Pull image into docker then execute
+
+```
+docker run -ti -d -v {yourvolumeforpersistentconfig}:/app/config --name watchdog drjp81/camwatchdog:latest
+```
+OR 
 
 Run a modified version of the docker-compose.yml to suit your needs
 
