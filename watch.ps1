@@ -1,4 +1,6 @@
-$data = (Invoke-WebRequest -uri "https://raw.githubusercontent.com/drjp81perso/rtspwatchdog/main/process.ps1" ).contents
+$url = "https://raw.githubusercontent.com/drjp81perso/rtspwatchdog/main/process.ps1"
+Write-Host ("downloading script from source: " + $url)
+$data = (Invoke-WebRequest -uri $url).content
 if ($data)
 {
     try {

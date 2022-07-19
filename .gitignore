@@ -1,3 +1,4 @@
 config.json
 .vscode
 docker-compose.yml
+work.ps1
