@@ -152,8 +152,10 @@ do {
         $job | Remove-Job -Force #cleanup, whatever wappens and relaunch
     }
     $leftsleep = ([int]$global:config.config.interval - ($a + $tottasks)) #calculate what's left of the interval delay, not to hammer the system
-    write-host ("Time left to sleep: " + [math]::Round($leftsleep,2) + " seconds.")
-    Start-Sleep -Seconds $leftsleep
+   if ($leftsleep -ge 1 ){
+            write-host ("Time left to sleep: " + [math]::Round($leftsleep,2) + " seconds.")
+            Start-Sleep -Seconds $leftsleep
+        }
     Write-Host "-----------------------cycle ends-------------------------"
     write-host
 
