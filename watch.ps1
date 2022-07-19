@@ -129,24 +129,19 @@ do {
     #lets check the state of our probes
     foreach ($source in $global:thelist) {
         $job = get-job -name $source.Key
-        $newcmd = ""        
+     
         #these jobs succeeded we should execute the commands
         if ($job.State -ieq "Completed") {
-            if ($hashcams[$source.Key] -eq 0) {
-                $newcmd = Invoke-Expression $source.Value.commands_online.replace("@@name@@", $source.Key) #only executes if the state changed
-                write-host ($source.Key + " Command result: " + $newcmd)
+            if ($hashcams[$source.Key] -ne 1) { #the initial value of -1 is caught here and we'll assume the camera is on
+                Invoke-Expression $source.Value.commands_online.replace("@@name@@", $source.Key) #only executes if the state changed
                 $hashcams[$source.Key] = 1 #set to "last time, we had success"
             } 
         }
         else {
-            if ($hashcams[$source.Key] -eq 1) {
-                $newcmd = Invoke-Expression $source.Value.commands_offline.replace("@@name@@", $source.Key) #only executes if the state changed
-                write-host ($source.Key + " Command result: " + $newcmd)
+            if ($hashcams[$source.Key] -ne 0) {
+                Invoke-Expression $source.Value.commands_offline.replace("@@name@@", $source.Key) #only executes if the state changed
                 $hashcams[$source.Key] = 0 # set to last time we failed
             }<# Action when all if and elseif conditions are false #>
-        }
-        if (-not $newcmd) {
-            write-host ($source.Key + ": State is the same, nothing to do.") 
         }
         
         $job | Remove-Job -Force #cleanup, whatever wappens and relaunch
