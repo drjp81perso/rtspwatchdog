@@ -133,12 +133,16 @@ do {
         #these jobs succeeded we should execute the commands
         if ($job.State -ieq "Completed") {
             if ($hashcams[$source.Key] -ne 1) { #the initial value of -1 is caught here and we'll assume the camera is on
+                Write-Host ("")
+                Write-Host ("--------------Launching " + $source.Key + " is ok, JOB-------------")
                 Invoke-Expression $source.Value.commands_online.replace("@@name@@", $source.Key) #only executes if the state changed
                 $hashcams[$source.Key] = 1 #set to "last time, we had success"
             } 
         }
         else {
             if ($hashcams[$source.Key] -ne 0) {
+                Write-Host ("")
+                Write-Host ("--------------Launching " + $source.Key + " is OFFLINE, JOB-------------")
                 Invoke-Expression $source.Value.commands_offline.replace("@@name@@", $source.Key) #only executes if the state changed
                 $hashcams[$source.Key] = 0 # set to last time we failed
             }<# Action when all if and elseif conditions are false #>

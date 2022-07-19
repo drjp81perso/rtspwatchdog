@@ -12,6 +12,6 @@ if ($data)
         exit -1
     }
 
-    chmod $file +x
+    chmod +x $file
     Invoke-Expression -Command $file
 }
