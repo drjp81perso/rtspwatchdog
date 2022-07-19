@@ -86,10 +86,15 @@ The two other configurations are:
 
 **note:** The interval is the hard limit to which the sources' timeout compare. So if you set a higher or equal value value to your sources' timeout it will ignore it and adjust to the lower interval value. 
 
+## About the process
+
+The [**watch.ps1**](./watch.ps1) file is a bootstrapper that will get (download) [**process.ps1**](./process.ps1) and will save it to the "/app/scripts" directory under the name "work.ps1" then, it will attempt to launch it.
+
+This is so we don't have to rebuild the docker image every time a bug fix comes along. It is in effect, auto updated every time it starts. Of course, you can use your own repo/url it the need be.
 
 # FAQ
-What if I don't want to launch a command upon the camera coming back online$
-Just put a command like "echo camera @@name@@ back" or something. 
+- What if I don't want to launch a command upon the camera coming back online?
+    - Just put a command like "echo camera @@name@@ back" or something. 
 ### ToDo: 
 ~~- Spread out the probes across the interval to use the cpu/threads more uniformly instead of spiking it with a bunch of async processes.~~
 - Some more debuggimg...
