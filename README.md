@@ -71,6 +71,7 @@ Each "source" is defined in a json file. Here we have a stream from the "doorbel
 
 1. The url defines the stream we want to probe
 2. The timeout determines the maximum amount of time (in seconds) [ffprobe](https://ffmpeg.org/ffprobe.html) will wait before it gets an answer (it also defines the analyzeduration parameter: it is 2 seconds shorter).
+An important note about this parameter. It could turn out that **the cycle time is LONGER that this interval.** Which means, the time taken to verify all your sources, is actually longer than the interval you have set. If this is your case, there will be "0" seconds of wait (or sleeping time) between check/loops. Perhaps this is desired for systems that need a more critical analysis of the sources.  
 3. commands_offline: what to execute if the feed can't be probed successfully (here I use a web hook like command with wget) 
 4. command_offline: same as above but when it comes back online 
 
