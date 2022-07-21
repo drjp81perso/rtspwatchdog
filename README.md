@@ -19,7 +19,7 @@ Same happens when the source becomes unavailable, a specific command is launched
 **NOTE:** While the source's state/availability **stays the same**, no new commands are sent.
 # Getting started
 
-I have exposed different flavours of the images in my [**docker hub repo**](https://hub.docker.com/repository/docker/drjp81/camwatchdog)
+I have exposed different flavours of the images in my [**docker hub repo**](https://hub.docker.com/r/drjp81/camwatchdog)
 
 The default image/tag drjp81/camwatchdog:latest a linux/arm64, linux/amd64 and linux/arm32 variant. 
 
@@ -38,7 +38,7 @@ Build your own from source
 
 ## Option Linux
 You could just install powershell in linux and run the watch.ps1 file in a cron job.
-I have 3 public flavours (arm/arm64/amd64) of powershell core 7.2.5 in my docker repo: [**drjp81/powershell**](https://hub.docker.com/repository/docker/drjp81/powershell)
+I have 3 public flavours (arm/arm64/amd64) of powershell core 7.2.5 in my docker repo: [**drjp81/powershell**](https://hub.docker.com/r/drjp81/powershell)
 
 # Configurations
 The [./vanilla.json](./vanilla.json) file is a "vanilla" version of the required "config.json" file that normally represents your configuration.
