@@ -56,7 +56,7 @@ So if you prepared a config file of your own and would like it to persist, use D
         "sources": {
             "doorbell": {
                 "url": "rtsp://admin:password@127.0.0.1",
-                "timeout": 30,
+                "addargs": "-stimeout 5000000",
                 "commands_offline": "wget 'http://192.168.0.2/cameraon?cam=@@name@@&state=off' -O /dev/null",
                 "commands_online": "wget 'http://192.168.0.2/cameraon?cam=@@name@@&state=on' -O /dev/null"
             }
@@ -70,8 +70,8 @@ So if you prepared a config file of your own and would like it to persist, use D
 Each "source" is defined in a json file. Here we have a stream from the "doorbell" named as such.
 
 1. The url defines the stream we want to probe
-2. The timeout determines the maximum amount of time (in seconds) [ffprobe](https://ffmpeg.org/ffprobe.html) will wait before it gets an answer (it also defines the analyzeduration parameter: it is 2 seconds shorter).
-An important note about this parameter. It could turn out that **the cycle time is LONGER that this interval.** Which means, the time taken to verify all your sources, is actually longer than the interval you have set. If this is your case, there will be "0" seconds of wait (or sleeping time) between check/loops. Perhaps this is desired for systems that need a more critical analysis of the sources.  
+2. The "additional arguments" to pass to ffprobe. (like the protocol specific timeout argument)
+These could affect the time it takes for a loop/cycle to happen. Take that into consideration.  
 3. commands_offline: what to execute if the feed can't be probed successfully (here I use a web hook like command with wget) 
 4. command_offline: same as above but when it comes back online 
 

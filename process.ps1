@@ -69,7 +69,7 @@ if (-not (loadconfig)) {
 foreach ($source in $global:thelist) {
     Write-Host ("source name: " + $source.Key)
     Write-Host ("source url: " + (cleanpass -url $source.Value.url))
-    Write-Host ("source timeout: " + $source.Value.timeout)
+    Write-Host ("source additional args: " + $source.Value.addargs)
     Write-Host ("source commands offline: " + $source.Value.commands_offline)
     Write-Host ("source commands online: " + $source.Value.commands_online)
 }
@@ -83,28 +83,20 @@ do {
     $tottasks = 0 #counter to keep track of how much time to spread out the tasks on   
     #redefine the timeouts for the probes, if they are the same than the interval
     foreach ($source in $global:thelist) {
-        if ($source.Value.timeout -ge $global:config.config.interval) {
-            $source.Value.timeout = ($global:config.config.interval - 2)
-        }
+
         if ($null -eq $hashcams[$source.Key]) {
             $hashcams.Add($source.Key, -1)
         }
         
-        #ack!
-        if ($Env:OS -ilike "windows*") {
-            $timeoutarg = "-timeout"
-        }
-        else {
-            $timeoutarg = "-stimeout"<# Action when all if and elseif conditions are false #>
-        }
+
         #defin the ffprobe args
         $cargs = @(
             "-hide_banner", 
             "-loglevel error",
            ("-i " + $source.Value.url),
-           ("-analyzeduration " + $source.Value.timeout + "M "),
+           ("-analyzeduration 2M "),
            ("-probesize 1000k")
-           ($timeoutarg + " " + $source.Value.timeout * 1000000)
+           $source.Value.addargs
         )
          
         write-host ($global:config.config.ffprobepath + " " + (cleanpass -url $cargs))
