@@ -15,6 +15,6 @@ COPY ./vanilla.json /app/vanilla/
 COPY ./watch.ps1 /app/script/
 COPY ./health.ps1 /app/script/
 
-HEALTHCHECK --interval=60s --timeout=15s CMD ["/usr/bin/pwsh", "-file", "/app/script/health.ps1"]
-CMD ["/usr/bin/pwsh","-file", "/app/script/watch.ps1"]
+HEALTHCHECK --interval=60s --timeout=15s CMD ["/usr/bin/pwsh","-NoLogo", "-NonInteractive","-NoProfile" "-File", "/app/script/health.ps1"]
+CMD ["/usr/bin/pwsh","-NoLogo", "-NonInteractive","-NoProfile" "-File", "/app/script/watch.ps1"]
 
