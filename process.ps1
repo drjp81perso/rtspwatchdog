@@ -149,5 +149,5 @@ do {
         }
     Write-Host "-----------------------cycle ends-------------------------"
     write-host
-
+    Get-ChildItem $Env:Temp | Remove-Item -Force
 } while ($eternity) #loop forever
